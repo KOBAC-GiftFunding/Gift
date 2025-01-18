@@ -3,8 +3,14 @@ import { getDeadlineCampaigns, getNewCampaigns, createCampaign } from '../contro
 
 const router = Router();
 
-router.get('/?sort=deadline', getDeadlineCampaigns);
-router.get('/?sort=new', getNewCampaigns);
+// 마감임박 펀딩 조회
+router.get('/deadline', getDeadlineCampaigns);
+
+// 신규 펀딩 조회
+router.get('/new', getNewCampaigns);
+
+// 새 펀딩 생성
 router.post('/', createCampaign);
 
 export default router;
+
