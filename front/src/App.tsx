@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import MainPage from './pages/MainPage';
+import DeadlinePage from './pages/DeadlinePage';
+import NewPage from './pages/NewPage';
+import CreatePage from './pages/CreatePage';
+import DetailPage from './pages/DetailPage';
+import MyPage from './pages/MyPage';
+import SuccessPage from './pages/SuccessPage';
+import FailedPage from './pages/FailedPage';
+import OngoingPage from './pages/OngoingPage';
 
-function App() {
-  const [count, setCount] = useState(0)
 
+
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <div className="pt-[90px]">
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/deadline" element={<DeadlinePage />} />
+            <Route path="/new" element={<NewPage />} />
+            <Route path="/create" element={<CreatePage />} />
+            <Route path="/my" element={<MyPage />} />
+            <Route path="/detail/:id" element={<DetailPage />} />
+            <Route path="/success/:id" element={<SuccessPage />} />
+            <Route path="/failed/:id" element={<FailedPage />} />
+            <Route path="/ongoing/:id" element={<OngoingPage />} />
+          </Routes>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </Router>
+  );
+};
 
-export default App
+export default App;
