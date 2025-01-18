@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './utils/database';
 import campaignRoutes from './routes/campaigns';
+import myCampaignRoutes from './routes/myCampaigns';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // 라우트 설정
 app.use('/campaigns', campaignRoutes);
+app.use('/my-campaigns', myCampaignRoutes);
 
 // 데이터베이스 연결
 connectDB();
