@@ -9,24 +9,24 @@ interface Participant {
 }
 
 
-const FailedPage = () => {
+const MyFailedPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [showShareModal, setShowShareModal] = useState(false);
     const [fundingData, setFundingData] = useState({
-        nickname: 'To. 취업 축하',
-        id: '5',
+        nickname: '빼빼로데이 선물',
+        id: '2',
         walletAddress: '',
-        targetAmount: '0.5',
-        currentAmount: '0.2',
-        deadline: '2025.01.12 18:00',
-        description: '취업했어요~!',
+        targetAmount: '0.1',
+        currentAmount: '0.05',
+        deadline: '2025.01.15 18:00',
+        description: '빼빼로데이 선물 주세요',
         participants: [
-            { address: '0x4AC1...', amount: '0.1ETH' },
-            { address: '0X1FF2...', amount: '0.1ETH' }
+            { address: '0x1C02...', amount: '0.02ETH' },
+            { address: '0x8AA1...', amount: '0.03ETH' }
         ],
         daysLeft: 0,
-        progress: 40,
+        progress: 50,
         status: '실패'
     });
 
@@ -246,4 +246,4 @@ const FailedPage = () => {
     );
 };
 
-export default FailedPage;
+export default MyFailedPage;

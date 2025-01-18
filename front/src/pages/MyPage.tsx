@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FundingCard from '../components/FundingCard';
 import SuccessCard from '../components/SuccessCard';
@@ -10,40 +10,108 @@ const MyPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
 
-    // 임시 데이터 생성
-    const mockData = Array(12).fill(1).map((_, i) => ({
-        id: '1234',
-        title: "To. XXX",
-        currentAmount: "0.4509",
-        targetAmount: "0.5782",
-        deadline: "2025.01.01",
-        daysLeft: "10",
-        progress: 78,
-        status: i % 3 === 0 ? 'success' : i % 3 === 1 ? 'failed' : 'ongoing'
-    }));
+    // 모집한 펀딩 목업 데이터
+    const mockCreatedData = [
+        {
+            id: '11',
+            title: "생일 선물",
+            currentAmount: "0.498",
+            targetAmount: "0.498",
+            deadline: "2025.01.1",
+            daysLeft: "0",
+            progress: 100,
+            status: 'success'
+        },
+        {
+            id: '12',
+            title: "빼빼로데이 선물",
+            currentAmount: "0.05",
+            targetAmount: "0.1000",
+            deadline: "2024.01.15",
+            daysLeft: "0",
+            progress: 50,
+            status: 'failed'
+        },
+        {
+            id: '13',
+            title: "새해 선물",
+            currentAmount: "0.3000",
+            targetAmount: "0.8000",
+            deadline: "2024.01.25",
+            daysLeft: "6",
+            progress: 37,
+            status: 'ongoing'
+        }
+    ];
 
-    // 현재 페이지 데이터
-    const currentItems = mockData.slice(
+    // 참여한 펀딩 목업 데이터
+    const mockParticipatedData = [
+        {
+            id: '14',
+            title: "To. 졸업 선물",
+            currentAmount: "0.6000",
+            targetAmount: "0.6000",
+            deadline: "2024.01.10",
+            daysLeft: "0",
+            progress: 100,
+            status: 'success'
+        },
+        {
+            id: '15',
+            title: "To. 취업 축하",
+            currentAmount: "0.2000",
+            targetAmount: "0.5000",
+            deadline: "2024.01.05",
+            daysLeft: "0",
+            progress: 40,
+            status: 'failed'
+        },
+    ];
+
+    const currentData = activeTab === 'created' ? mockCreatedData : mockParticipatedData;
+    const currentItems = currentData.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
-    // 총 페이지 수 계산
-    const totalPages = Math.ceil(mockData.length / itemsPerPage);
+    const totalPages = Math.ceil(currentData.length / itemsPerPage);
     const pageButtons = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-    // 카드 클릭 핸들러
     const handleCardClick = (id: string, status: string) => {
-        switch (status) {
-            case 'success':
-                navigate(`/success/${id}`);
-                break;
-            case 'failed':
-                navigate(`/failed/${id}`);
-                break;
-            default:
-                navigate(`/ongoing/${id}`);
+        // 클릭한 카드의 데이터를 localStorage에 저장
+        const selectedCard = currentData.find(item => item.id === id);
+        if (selectedCard) {
+            localStorage.setItem('selectedFunding', JSON.stringify(selectedCard));
         }
+
+        if (activeTab === 'created') {
+            switch (status) {
+                case 'success':
+                    navigate(`/mysuccess/${id}`);
+                    break;
+                case 'failed':
+                    navigate(`/myfailed/${id}`);
+                    break;
+                default:
+                    navigate(`/myongoing/${id}`);
+            }
+        } else {
+            switch (status) {
+                case 'success':
+                    navigate(`/success/${id}`);
+                    break;
+                case 'failed':
+                    navigate(`/failed/${id}`);
+                    break;
+                default:
+                    navigate(`/ongoing/${id}`);
+            }
+        }
+    };
+
+    const handleTabChange = (tab: string) => {
+        setActiveTab(tab);
+        setCurrentPage(1);
     };
 
     return (
@@ -53,10 +121,7 @@ const MyPage = () => {
             {/* 탭 메뉴 */}
             <div className="flex gap-4 mb-8 border-b">
                 <button
-                    onClick={() => {
-                        setActiveTab('created');
-                        setCurrentPage(1);
-                    }}
+                    onClick={() => handleTabChange('created')}
                     className={`pb-4 px-4 ${activeTab === 'created'
                         ? 'text-[#3BCFB4] border-b-2 border-[#3BCFB4]'
                         : 'text-gray-500'
@@ -65,10 +130,7 @@ const MyPage = () => {
                     모집한 펀딩
                 </button>
                 <button
-                    onClick={() => {
-                        setActiveTab('participated');
-                        setCurrentPage(1);
-                    }}
+                    onClick={() => handleTabChange('participated')}
                     className={`pb-4 px-4 ${activeTab === 'participated'
                         ? 'text-[#3BCFB4] border-b-2 border-[#3BCFB4]'
                         : 'text-gray-500'
@@ -83,20 +145,32 @@ const MyPage = () => {
                 {currentItems.map((item) => {
                     if (item.status === 'success') {
                         return (
-                            <div onClick={() => handleCardClick(item.id, item.status)}>
-                                <SuccessCard key={item.id} {...item} />
+                            <div
+                                key={item.id}
+                                onClick={() => handleCardClick(item.id, item.status)}
+                                className="cursor-pointer transition-transform duration-200 hover:scale-105"
+                            >
+                                <SuccessCard {...item} />
                             </div>
                         );
                     } else if (item.status === 'failed') {
                         return (
-                            <div onClick={() => handleCardClick(item.id, item.status)}>
-                                <FailedCard key={item.id} {...item} />
+                            <div
+                                key={item.id}
+                                onClick={() => handleCardClick(item.id, item.status)}
+                                className="cursor-pointer transition-transform duration-200 hover:scale-105"
+                            >
+                                <FailedCard {...item} />
                             </div>
                         );
                     } else {
                         return (
-                            <div onClick={() => handleCardClick(item.id, item.status)}>
-                                <FundingCard key={item.id} {...item} />
+                            <div
+                                key={item.id}
+                                onClick={() => handleCardClick(item.id, item.status)}
+                                className="cursor-pointer transition-transform duration-200 hover:scale-105"
+                            >
+                                <FundingCard {...item} />
                             </div>
                         );
                     }

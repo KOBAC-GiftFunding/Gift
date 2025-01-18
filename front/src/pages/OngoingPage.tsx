@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers';
 
 interface Participant {
     address: string;
@@ -13,77 +12,47 @@ const OngoingPage = () => {
     const [showShareModal, setShowShareModal] = useState(false);
     const [showFundingModal, setShowFundingModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [balance, setBalance] = useState('0');
     const [fundingAmount, setFundingAmount] = useState('');
     const [fundingNickname, setFundingNickname] = useState('');
     const [fundingMessage, setFundingMessage] = useState('');
-    const [fundingData, setFundingData] = useState({
-        nickname: '내가 모집한 펀딩',
-        id: '1234',
-        walletAddress: '',
-        targetAmount: '0.1234',
-        currentAmount: '0',
-        deadline: '2025.01.01 18:00',
-        description: '설명 어쩌구 저쩌구...',
-        participants: [
-            { address: 'AAAAAAAAAAAA...', amount: '0.001ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.001ETH' }
-        ],
-        daysLeft: 3,
-        progress: 0,
-        status: '진행중'
-    });
 
     useEffect(() => {
-        checkWalletConnection();
-        getFundingData();
-        getBalance();
+        const savedFunding = localStorage.getItem('selectedFunding');
+        if (savedFunding) {
+            const parsedData = JSON.parse(savedFunding);
+            setFundingData(prev => ({
+                ...prev,
+                nickname: parsedData.title,
+                id: parsedData.id,
+                walletAddress: parsedData.walletAddress,
+                targetAmount: parsedData.targetAmount,
+                currentAmount: parsedData.currentAmount,
+                deadline: parsedData.deadline,
+                daysLeft: parsedData.daysLeft,
+                progress: parsedData.progress,
+                description: parsedData.description,
+                participants: parsedData.participants
+            }));
+        }
     }, [id]);
 
-    const checkWalletConnection = async () => {
-        try {
-            const { ethereum } = window;
-            if (!ethereum) return;
-
-            const accounts = await ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0) {
-                setFundingData(prev => ({
-                    ...prev,
-                    walletAddress: accounts[0]
-                }));
-            }
-        } catch (error) {
-            console.error('지갑 연결 확인 중 오류:', error);
-        }
-    };
-
-    const getBalance = async () => {
-        try {
-            const { ethereum } = window;
-            if (!ethereum) return;
-
-            const accounts = await ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0) {
-                const balance = await ethereum.request({
-                    method: 'eth_getBalance',
-                    params: [accounts[0], 'latest']
-                });
-
-                const ethBalance = ethers.utils.formatEther(balance);
-                setBalance(ethBalance);
-            }
-        } catch (error) {
-            console.error('잔액 조회 실패:', error);
-        }
-    };
-
-    const getFundingData = async () => {
-        try {
-            // 스마트 컨트랙트에서 펀딩 정보 조회
-        } catch (error) {
-            console.error('펀딩 정보 조회 실패:', error);
-        }
-    };
+    const [fundingData, setFundingData] = useState({
+        nickname: '내가 참여한 펀딩',
+        id: '1234',
+        walletAddress: '0x123...456',
+        targetAmount: '0.5000',
+        currentAmount: '0.4509',
+        deadline: '2024.02.01 18:00',
+        description: '생일선물 펀딩입니다',
+        participants: [
+            { address: '0xABC...123', amount: '0.2ETH' },
+            { address: '0xDEF...456', amount: '0.1ETH' },
+            { address: '0xGHI...789', amount: '0.1ETH' }
+        ],
+        daysLeft: 13,
+        progress: 90,
+        status: '진행중'
+    });
 
     const handleShare = () => {
         setShowShareModal(true);
@@ -99,44 +68,13 @@ const OngoingPage = () => {
         setShowFundingModal(true);
     };
 
-    const handleFundingSubmit = async () => {
-        try {
-            const { ethereum } = window;
-            if (!ethereum) {
-                alert('MetaMask가 필요합니다.');
-                return;
-            }
-
-            if (!fundingAmount || !fundingNickname) {
-                alert('모든 필수 항목을 입력해주세요.');
-                return;
-            }
-
-            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            const account = accounts[0];
-
-            const weiAmount = ethers.utils.parseEther(fundingAmount);
-
-            const transaction = {
-                from: account,
-                to: fundingData.walletAddress,
-                value: weiAmount.toString(),
-                gas: '21000',
-            };
-
-            await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [transaction],
-            });
-
-            setShowFundingModal(false);
-            setShowConfirmModal(true);
-            getFundingData();
-            getBalance();
-        } catch (error) {
-            console.error('펀딩 실패:', error);
-            alert('펀딩에 실패했습니다.');
+    const handleFundingSubmit = () => {
+        if (!fundingAmount || !fundingNickname) {
+            alert('모든 필수 항목을 입력해주세요.');
+            return;
         }
+        setShowFundingModal(false);
+        setShowConfirmModal(true);
     };
 
     const FundingModal = () => (
@@ -254,7 +192,7 @@ const OngoingPage = () => {
                     <h1 className="text-2xl flex items-center gap-2">
                         {fundingData.nickname}{' '}
                         <span className="text-[#4B9AFB]">#{fundingData.id}</span>
-                        <span className="text-sm px-3 py-1 text-[#4B9AFB] border border-[#4B9AFB] rounded-full">
+                        <span className="text-sm px-3 py-1 text-[#489AF8] border border-[#489AF8] rounded-full">
                             {fundingData.status}
                         </span>
                     </h1>

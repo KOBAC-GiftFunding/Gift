@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers';
 
 interface Participant {
     address: string;
@@ -13,31 +12,26 @@ const DetailPage = () => {
     const [showShareModal, setShowShareModal] = useState(false);
     const [showFundingModal, setShowFundingModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [balance, setBalance] = useState('0');
     const [fundingAmount, setFundingAmount] = useState('');
     const [fundingNickname, setFundingNickname] = useState('');
     const [fundingMessage, setFundingMessage] = useState('');
     const [fundingData, setFundingData] = useState({
-        nickname: 'XXX',
-        id: '1234',
+        nickname: 'PresentHub',
+        id: '1',
         walletAddress: '',
-        targetAmount: '0.1234',
+        targetAmount: '0.1',
         currentAmount: '0',
-        deadline: '2025.01.01 18:00',
-        description: '설명 어쩌구 저쩌구...',
+        deadline: '2025.01.15 18:00',
+        description: '안녕하세요. 선물펀딩 PresentHub입니다.',
         participants: [
-            { address: 'AAAAAAAAAAAA...', amount: '0.001ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.001ETH' }
         ],
-        daysLeft: 3,
+        daysLeft: 6,
         progress: 0,
         status: '진행중'
     });
-
     useEffect(() => {
         checkWalletConnection();
         getFundingData();
-        getBalance();
     }, [id]);
 
     const checkWalletConnection = async () => {
@@ -54,26 +48,6 @@ const DetailPage = () => {
             }
         } catch (error) {
             console.error('지갑 연결 확인 중 오류:', error);
-        }
-    };
-
-    const getBalance = async () => {
-        try {
-            const { ethereum } = window;
-            if (!ethereum) return;
-
-            const accounts = await ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0) {
-                const balance = await ethereum.request({
-                    method: 'eth_getBalance',
-                    params: [accounts[0], 'latest']
-                });
-
-                const ethBalance = ethers.utils.formatEther(balance);
-                setBalance(ethBalance);
-            }
-        } catch (error) {
-            console.error('잔액 조회 실패:', error);
         }
     };
 
@@ -99,46 +73,14 @@ const DetailPage = () => {
         setShowFundingModal(true);
     };
 
-    const handleFundingSubmit = async () => {
-        try {
-            const { ethereum } = window;
-            if (!ethereum) {
-                alert('MetaMask가 필요합니다.');
-                return;
-            }
-
-            if (!fundingAmount || !fundingNickname) {
-                alert('모든 필수 항목을 입력해주세요.');
-                return;
-            }
-
-            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            const account = accounts[0];
-
-            const weiAmount = ethers.utils.parseEther(fundingAmount);
-
-            const transaction = {
-                from: account,
-                to: fundingData.walletAddress,
-                value: weiAmount.toString(),
-                gas: '21000',
-            };
-
-            await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [transaction],
-            });
-
-            setShowFundingModal(false);
-            setShowConfirmModal(true);
-            getFundingData();
-            getBalance();
-        } catch (error) {
-            console.error('펀딩 실패:', error);
-            alert('펀딩에 실패했습니다.');
+    const handleFundingSubmit = () => {
+        if (!fundingAmount || !fundingNickname) {
+            alert('모든 필수 항목을 입력해주세요.');
+            return;
         }
+        setShowFundingModal(false);
+        setShowConfirmModal(true);
     };
-
     const FundingModal = () => (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg w-[500px]">
@@ -252,7 +194,7 @@ const DetailPage = () => {
             <div className="max-w-[1200px] mx-auto">
                 <div className="mb-8">
                     <h1 className="text-2xl flex items-center gap-2">
-                        To. {fundingData.nickname}{' '}
+                        {fundingData.nickname}{' '}
                         <span className="text-[#4B9AFB]">#{fundingData.id}</span>
                         <span className="text-sm px-3 py-1 text-[#489AF8] border border-[#489AF8] rounded-full">
                             {fundingData.status}
@@ -264,7 +206,7 @@ const DetailPage = () => {
                     {/* 이미지 섹션 */}
                     <div className="w-[400px] h-[400px] bg-gray-100 rounded-lg overflow-hidden">
                         <img
-                            src="/Keyboard.png"
+                            src="/ex.PNG"
                             alt="펀딩 이미지"
                             className="w-full h-full object-cover"
                         />

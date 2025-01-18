@@ -10,6 +10,10 @@ import MyPage from './pages/MyPage';
 import SuccessPage from './pages/SuccessPage';
 import FailedPage from './pages/FailedPage';
 import OngoingPage from './pages/OngoingPage';
+import RefundPage from './pages/RefundPage';
+import MySuccessPage from './pages/MySuccessPage';
+import MyOngoingPage from './pages/MyOngoingPage';
+import MyFailedPage from './pages/MyFailedPage';
 
 
 
@@ -29,6 +33,10 @@ const App = () => {
             <Route path="/success/:id" element={<SuccessPage />} />
             <Route path="/failed/:id" element={<FailedPage />} />
             <Route path="/ongoing/:id" element={<OngoingPage />} />
+            <Route path="/refund/:id" element={<RefundPage />} />
+            <Route path="/mysuccess/:id" element={<MySuccessPage />} />
+            <Route path="/myongoing/:id" element={<MyOngoingPage />} />
+            <Route path="/myfailed/:id" element={<MyFailedPage />} />
           </Routes>
         </div>
       </div>

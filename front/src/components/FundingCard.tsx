@@ -1,16 +1,31 @@
 import React from 'react';
 
-const FundingCard = ({
-    title = "To. XXX",
-    currentAmount = "0.4509",
-    targetAmount = "0.5782",
-    deadline = "2025.01.01",
-    daysLeft = "10",
-    progress = 78,
+interface FundingCardProps {
+    id: string;
+    title: string;
+    currentAmount: string;
+    targetAmount: string;
+    deadline: string;
+    daysLeft: string;
+    progress: number;
+    onClick?: () => void;
+}
+
+const FundingCard: React.FC<FundingCardProps> = ({
+    id,
+    title,
+    currentAmount,
+    targetAmount,
+    deadline,
+    daysLeft,
+    progress,
     onClick
 }) => {
     return (
-        <div className="bg-white rounded-lg overflow-hidden shadow">
+        <div
+            className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow"
+            onClick={onClick}
+        >
             {/* Image & Progress */}
             <div className="relative">
                 <img

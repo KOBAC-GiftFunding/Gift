@@ -1,35 +1,69 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FundingCard from '../components/FundingCard';
 
 const NewPage = () => {
+    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8; // 한 페이지당 보여줄 카드 수
+    const itemsPerPage = 8;
 
-    // 임시 데이터 생성 (실제로는 API에서 받아올 예정)
-    const mockData = Array(10).fill(1).map((_, i) => ({
-        id: i + 1,
-        title: "To. XXX",
-        currentAmount: "0.4509",
-        targetAmount: "0.5782",
-        deadline: "2025.01.01",
-        daysLeft: "10",
-        progress: 78
-    }));
 
-    // 현재 페이지에 표시할 데이터
+    const mockData = [
+        {
+            id: '6',
+            title: "To. 새해 선물",
+            currentAmount: "0.1000",
+            targetAmount: "0.5000",
+            deadline: "2024.03.01",
+            daysLeft: "30",
+            progress: 20
+        },
+        {
+            id: '7',
+            title: "To. 승진 축하",
+            currentAmount: "0.2000",
+            targetAmount: "0.8000",
+            deadline: "2024.03.05",
+            daysLeft: "34",
+            progress: 25
+        },
+        {
+            id: '8',
+            title: "To. 출산 축하",
+            currentAmount: "0.3000",
+            targetAmount: "1.0000",
+            deadline: "2024.03.10",
+            daysLeft: "39",
+            progress: 30
+        },
+        {
+            id: '9',
+            title: "To. 돌잔치",
+            currentAmount: "0.1500",
+            targetAmount: "0.6000",
+            deadline: "2024.03.15",
+            daysLeft: "44",
+            progress: 25
+        },
+
+    ];
+
     const currentItems = mockData.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
-    // 총 페이지 수 계산
     const totalPages = Math.ceil(mockData.length / itemsPerPage);
+    const pageButtons = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-    // 페이지네이션 버튼 생성
-    const pageButtons = [];
-    for (let i = 1; i <= totalPages; i++) {
-        pageButtons.push(i);
-    }
+    const handleCardClick = (id: string) => {
+        // 클릭한 카드의 데이터를 localStorage에 저장
+        const selectedCard = mockData.find(item => item.id === id);
+        if (selectedCard) {
+            localStorage.setItem('selectedFunding', JSON.stringify(selectedCard));
+        }
+        navigate(`/ongoing/${id}`);
+    };
 
     return (
         <div className="container mx-auto px-6 py-8 mt-[30px]">
@@ -38,11 +72,13 @@ const NewPage = () => {
             {/* 카드 그리드 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {currentItems.map((item) => (
-                    <FundingCard
+                    <div
                         key={item.id}
-                        {...item}
-                        onClick={() => console.log(`Clicked card ${item.id}`)}
-                    />
+                        onClick={() => handleCardClick(item.id)}
+                        className="cursor-pointer transition-transform duration-200 hover:scale-105"
+                    >
+                        <FundingCard {...item} />
+                    </div>
                 ))}
             </div>
 

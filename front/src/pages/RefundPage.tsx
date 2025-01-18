@@ -1,32 +1,29 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { parseEther } from 'ethers';
-
 
 interface Participant {
     address: string;
     amount: string;
 }
 
-
-const FailedPage = () => {
+const RefundPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [showShareModal, setShowShareModal] = useState(false);
     const [fundingData, setFundingData] = useState({
-        nickname: 'To. 취업 축하',
-        id: '5',
+        nickname: '빼빼로데이 선물',
+        id: '2',
         walletAddress: '',
-        targetAmount: '0.5',
-        currentAmount: '0.2',
-        deadline: '2025.01.12 18:00',
-        description: '취업했어요~!',
+        targetAmount: '0.1',
+        currentAmount: '0.05',
+        deadline: '2025.01.15 18:00',
+        description: '빼빼로데이 선물 주세요',
         participants: [
-            { address: '0x4AC1...', amount: '0.1ETH' },
-            { address: '0X1FF2...', amount: '0.1ETH' }
+            { address: '0x1C02...', amount: '0.002ETH' },
+            { address: '0x8AA1...', amount: '0.003ETH' }
         ],
         daysLeft: 0,
-        progress: 40,
+        progress: 50,
         status: '실패'
     });
 
@@ -69,49 +66,6 @@ const FailedPage = () => {
         navigator.clipboard.writeText(currentUrl);
         setShowShareModal(false);
     };
-
-    const handleRefund = () => {
-        navigate(`/refund/${id}`);
-    };
-
-    const handleAdditionalFunding = async () => {
-        try {
-            const { ethereum } = window as any;
-            if (!ethereum) {
-                alert('MetaMask가 필요합니다.');
-                return;
-            }
-
-            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            const account = accounts[0];
-
-            // 목표액과 현재 모금액의 차이 계산
-            const targetAmount = parseFloat(fundingData.targetAmount);
-            const currentAmount = parseFloat(fundingData.currentAmount);
-            const remainingAmount = (targetAmount - currentAmount).toFixed(18); // ETH는 18자리 소수점
-
-            // Wei로 변환
-            const weiAmount = parseEther(remainingAmount);
-
-            const transaction = {
-                from: account,
-                to: fundingData.walletAddress,
-                value: weiAmount.toString(),
-                gas: '21000',
-            };
-
-            await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [transaction],
-            });
-
-            navigate(`/success/${id}`);
-        } catch (error) {
-            console.error('추가 펀딩 실패:', error);
-            alert('추가 펀딩에 실패했습니다.');
-        }
-    };
-
 
     const ShareModal = () => (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -210,16 +164,10 @@ const FailedPage = () => {
                                 </svg>
                             </button>
                             <button
-                                onClick={handleRefund}
-                                className="flex-1 py-3 bg-gray-400 text-white rounded-lg hover:opacity-90"
+                                className="flex-1 py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed"
+                                disabled
                             >
-                                환불하기
-                            </button>
-                            <button
-                                onClick={handleAdditionalFunding}
-                                className="flex-1 py-3 bg-[#3BCFB4] text-white rounded-lg hover:opacity-90"
-                            >
-                                추가 펀딩하기
+                                환불 완료
                             </button>
                         </div>
                     </div>
@@ -246,4 +194,4 @@ const FailedPage = () => {
     );
 };
 
-export default FailedPage;
+export default RefundPage;

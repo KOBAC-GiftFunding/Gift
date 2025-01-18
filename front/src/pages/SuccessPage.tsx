@@ -11,26 +11,21 @@ const SuccessPage = () => {
     const navigate = useNavigate();
     const [showShareModal, setShowShareModal] = useState(false);
     const [fundingData, setFundingData] = useState({
-        nickname: '내가 모집한 펀딩',
-        id: '1234',
+        nickname: 'To. 졸업 선물',
+        id: '3',
         walletAddress: '',
-        targetAmount: '0.1234',
-        currentAmount: '1',
-        deadline: '2025.01.01 18:00',
-        description: '설명 어쩌구 저쩌구...',
+        targetAmount: '0.6',
+        currentAmount: '0.6',
+        deadline: '2025.01. 19 18:00',
+        description: '졸업 선물 주세요.',
         participants: [
-            { address: 'AAAAAAAAAAAA...', amount: '0.05ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.1ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.3ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.02ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.01ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.015ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.001ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.001ETH' },
-            { address: 'AAAAAAAAAAAA...', amount: '0.001ETH' },
+            { address: '0x1C1B...', amount: '0.3ETH' },
+            { address: '0x4A2c...', amount: '0.1ETH' },
+            { address: '0x94Ab...', amount: '0.2ETH' },
+
         ],
         daysLeft: 0,
-        progress: 1100,
+        progress: 100,
         status: '성공'
     });
 

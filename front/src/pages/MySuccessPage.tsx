@@ -1,33 +1,37 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { parseEther } from 'ethers';
-
 
 interface Participant {
     address: string;
     amount: string;
 }
 
-
-const FailedPage = () => {
+const MySuccessPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [showShareModal, setShowShareModal] = useState(false);
     const [fundingData, setFundingData] = useState({
-        nickname: 'To. 취업 축하',
-        id: '5',
+        nickname: '생일 선물',
+        id: '1',
         walletAddress: '',
-        targetAmount: '0.5',
-        currentAmount: '0.2',
-        deadline: '2025.01.12 18:00',
-        description: '취업했어요~!',
+        targetAmount: '0.498',
+        currentAmount: '0.498',
+        deadline: '2025.01.01 18:00',
+        description: '',
         participants: [
-            { address: '0x4AC1...', amount: '0.1ETH' },
-            { address: '0X1FF2...', amount: '0.1ETH' }
+            { address: '0x4B1...', amount: '0.05ETH' },
+            { address: '0x1C5....', amount: '0.1ETH' },
+            { address: '0x45B...', amount: '0.3ETH' },
+            { address: '0xFF7...', amount: '0.02ETH' },
+            { address: '0x8B3...', amount: '0.01ETH' },
+            { address: '0x4D2...', amount: '0.015ETH' },
+            { address: '0x10E...', amount: '0.001ETH' },
+            { address: '0x4E5...', amount: '0.001ETH' },
+            { address: '0x2AC...', amount: '0.001ETH' },
         ],
         daysLeft: 0,
-        progress: 40,
-        status: '실패'
+        progress: 100,
+        status: '성공'
     });
 
     useEffect(() => {
@@ -70,49 +74,6 @@ const FailedPage = () => {
         setShowShareModal(false);
     };
 
-    const handleRefund = () => {
-        navigate(`/refund/${id}`);
-    };
-
-    const handleAdditionalFunding = async () => {
-        try {
-            const { ethereum } = window as any;
-            if (!ethereum) {
-                alert('MetaMask가 필요합니다.');
-                return;
-            }
-
-            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            const account = accounts[0];
-
-            // 목표액과 현재 모금액의 차이 계산
-            const targetAmount = parseFloat(fundingData.targetAmount);
-            const currentAmount = parseFloat(fundingData.currentAmount);
-            const remainingAmount = (targetAmount - currentAmount).toFixed(18); // ETH는 18자리 소수점
-
-            // Wei로 변환
-            const weiAmount = parseEther(remainingAmount);
-
-            const transaction = {
-                from: account,
-                to: fundingData.walletAddress,
-                value: weiAmount.toString(),
-                gas: '21000',
-            };
-
-            await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [transaction],
-            });
-
-            navigate(`/success/${id}`);
-        } catch (error) {
-            console.error('추가 펀딩 실패:', error);
-            alert('추가 펀딩에 실패했습니다.');
-        }
-    };
-
-
     const ShareModal = () => (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg w-[400px]">
@@ -148,7 +109,7 @@ const FailedPage = () => {
                     <h1 className="text-2xl flex items-center gap-2">
                         {fundingData.nickname}{' '}
                         <span className="text-[#4B9AFB]">#{fundingData.id}</span>
-                        <span className="text-sm px-3 py-1 text-[#FF4C4C] border border-[#FF4C4C] rounded-full">
+                        <span className="text-sm px-3 py-1 text-[#3ED8BC] border border-[#3ED8BC] rounded-full">
                             {fundingData.status}
                         </span>
                     </h1>
@@ -186,7 +147,9 @@ const FailedPage = () => {
 
                         <div className="flex items-center py-4 border-b">
                             <span className="w-24 text-gray-600">마감일</span>
-                            <span className="flex-1">{fundingData.deadline}</span>
+                            <span className="flex-1">
+                                {fundingData.deadline}
+                            </span>
                         </div>
 
                         <div className="flex items-center py-4 border-b">
@@ -210,16 +173,10 @@ const FailedPage = () => {
                                 </svg>
                             </button>
                             <button
-                                onClick={handleRefund}
-                                className="flex-1 py-3 bg-gray-400 text-white rounded-lg hover:opacity-90"
+                                disabled
+                                className="flex-1 py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed"
                             >
-                                환불하기
-                            </button>
-                            <button
-                                onClick={handleAdditionalFunding}
-                                className="flex-1 py-3 bg-[#3BCFB4] text-white rounded-lg hover:opacity-90"
-                            >
-                                추가 펀딩하기
+                                모금액 수령 완료
                             </button>
                         </div>
                     </div>
@@ -246,4 +203,4 @@ const FailedPage = () => {
     );
 };
 
-export default FailedPage;
+export default MySuccessPage;

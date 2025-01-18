@@ -1,80 +1,80 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { parseEther } from 'ethers';
-
+import FundingModal from '../components/FundingModal';
 
 interface Participant {
     address: string;
     amount: string;
 }
 
-
-const FailedPage = () => {
+const MyOngoingPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+
     const [showShareModal, setShowShareModal] = useState(false);
+    const [showFundingModal, setShowFundingModal] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [balance, setBalance] = useState('0');
+    const [fundingForm, setFundingForm] = useState({
+        amount: '',
+        nickname: '',
+        message: ''
+    });
     const [fundingData, setFundingData] = useState({
-        nickname: 'To. 취업 축하',
-        id: '5',
+        nickname: '새해 선물',
+        id: '3',
         walletAddress: '',
-        targetAmount: '0.5',
-        currentAmount: '0.2',
-        deadline: '2025.01.12 18:00',
-        description: '취업했어요~!',
+        targetAmount: '0.8',
+        currentAmount: '0.3',
+        deadline: '2025.01.25 18:00',
+        description: '새해 선물 주세요',
         participants: [
-            { address: '0x4AC1...', amount: '0.1ETH' },
-            { address: '0X1FF2...', amount: '0.1ETH' }
+            { address: '0x1BF...', amount: '0.1ETH' },
+            { address: '0x0DG...', amount: '0.2ETH' }
         ],
-        daysLeft: 0,
-        progress: 40,
-        status: '실패'
+        daysLeft: 6,
+        progress: 37,
+        status: '진행중'
     });
 
     useEffect(() => {
         checkWalletConnection();
-        getFundingData();
+        getBalance();
     }, [id]);
 
     const checkWalletConnection = async () => {
-        try {
-            const { ethereum } = window;
-            if (!ethereum) return;
-
-            const accounts = await ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0) {
-                setFundingData(prev => ({
-                    ...prev,
-                    walletAddress: accounts[0]
-                }));
-            }
-        } catch (error) {
-            console.error('지갑 연결 확인 중 오류:', error);
+        const { ethereum } = window as any;
+        if (!ethereum) return;
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+        if (accounts[0]) {
+            setFundingData(prev => ({ ...prev, walletAddress: accounts[0] }));
         }
     };
 
-    const getFundingData = async () => {
-        try {
-            // 스마트 컨트랙트에서 펀딩 정보 조회
-        } catch (error) {
-            console.error('펀딩 정보 조회 실패:', error);
+    const getBalance = async () => {
+        const { ethereum } = window as any;
+        if (!ethereum) return;
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+        if (accounts[0]) {
+            const balance = await ethereum.request({
+                method: 'eth_getBalance',
+                params: [accounts[0], 'latest']
+            });
+            setBalance(parseEther(balance).toString());
         }
     };
 
     const handleShare = () => {
-        setShowShareModal(true);
-    };
-
-    const handleCopyUrl = () => {
-        const currentUrl = window.location.href;
-        navigator.clipboard.writeText(currentUrl);
+        navigator.clipboard.writeText(window.location.href);
         setShowShareModal(false);
     };
 
-    const handleRefund = () => {
-        navigate(`/refund/${id}`);
+    const handleFunding = () => {
+        setShowFundingModal(true);
     };
 
-    const handleAdditionalFunding = async () => {
+    const handleFundingSubmit = async () => {
         try {
             const { ethereum } = window as any;
             if (!ethereum) {
@@ -82,36 +82,31 @@ const FailedPage = () => {
                 return;
             }
 
+            if (!fundingForm.amount || !fundingForm.nickname) {
+                alert('필수 항목을 입력해주세요.');
+                return;
+            }
+
             const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            const account = accounts[0];
-
-            // 목표액과 현재 모금액의 차이 계산
-            const targetAmount = parseFloat(fundingData.targetAmount);
-            const currentAmount = parseFloat(fundingData.currentAmount);
-            const remainingAmount = (targetAmount - currentAmount).toFixed(18); // ETH는 18자리 소수점
-
-            // Wei로 변환
-            const weiAmount = parseEther(remainingAmount);
-
-            const transaction = {
-                from: account,
-                to: fundingData.walletAddress,
-                value: weiAmount.toString(),
-                gas: '21000',
-            };
+            const weiAmount = parseEther(fundingForm.amount);
 
             await ethereum.request({
                 method: 'eth_sendTransaction',
-                params: [transaction],
+                params: [{
+                    from: accounts[0],
+                    to: fundingData.walletAddress,
+                    value: weiAmount.toString(),
+                    gas: '21000'
+                }]
             });
 
-            navigate(`/success/${id}`);
+            setShowFundingModal(false);
+            setShowConfirmModal(true);
+            getBalance();
         } catch (error) {
-            console.error('추가 펀딩 실패:', error);
-            alert('추가 펀딩에 실패했습니다.');
+            alert('펀딩에 실패했습니다.');
         }
     };
-
 
     const ShareModal = () => (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -125,7 +120,7 @@ const FailedPage = () => {
                         readOnly
                     />
                     <button
-                        onClick={handleCopyUrl}
+                        onClick={handleShare}
                         className="px-4 py-2 bg-[#3BCFB4] text-white rounded hover:opacity-90"
                     >
                         복사
@@ -141,6 +136,21 @@ const FailedPage = () => {
         </div>
     );
 
+    const ConfirmModal = () => (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-[400px] text-center">
+                <h3 className="text-xl font-bold mb-4">펀딩 완료</h3>
+                <p className="mb-6">펀딩에 성공했습니다!</p>
+                <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="w-full py-3 bg-[#3BCFB4] text-white rounded-lg hover:opacity-90"
+                >
+                    확인
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <div className="container mx-auto px-6 py-8">
             <div className="max-w-[1200px] mx-auto">
@@ -148,14 +158,13 @@ const FailedPage = () => {
                     <h1 className="text-2xl flex items-center gap-2">
                         {fundingData.nickname}{' '}
                         <span className="text-[#4B9AFB]">#{fundingData.id}</span>
-                        <span className="text-sm px-3 py-1 text-[#FF4C4C] border border-[#FF4C4C] rounded-full">
+                        <span className="text-sm px-3 py-1 text-[#4B9AFB] border border-[#4B9AFB] rounded-full">
                             {fundingData.status}
                         </span>
                     </h1>
                 </div>
 
                 <div className="grid grid-cols-[400px,1fr,300px] gap-8">
-                    {/* 이미지 섹션 */}
                     <div className="w-[400px] h-[400px] bg-gray-100 rounded-lg overflow-hidden">
                         <img
                             src="/Keyboard.png"
@@ -164,7 +173,6 @@ const FailedPage = () => {
                         />
                     </div>
 
-                    {/* 가운데 펀딩 정보 */}
                     <div className="space-y-4">
                         <div className="flex items-center py-4 border-b">
                             <span className="w-24 text-gray-600">지갑주소</span>
@@ -186,7 +194,10 @@ const FailedPage = () => {
 
                         <div className="flex items-center py-4 border-b">
                             <span className="w-24 text-gray-600">마감일</span>
-                            <span className="flex-1">{fundingData.deadline}</span>
+                            <span className="flex-1">
+                                {fundingData.deadline}
+                                <span className="text-[#4B9AFB]"> ({fundingData.daysLeft}일 남음)</span>
+                            </span>
                         </div>
 
                         <div className="flex items-center py-4 border-b">
@@ -202,7 +213,7 @@ const FailedPage = () => {
                                 목록으로
                             </button>
                             <button
-                                onClick={handleShare}
+                                onClick={() => setShowShareModal(true)}
                                 className="p-2 border rounded-lg hover:bg-gray-50"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,40 +221,46 @@ const FailedPage = () => {
                                 </svg>
                             </button>
                             <button
-                                onClick={handleRefund}
-                                className="flex-1 py-3 bg-gray-400 text-white rounded-lg hover:opacity-90"
-                            >
-                                환불하기
-                            </button>
-                            <button
-                                onClick={handleAdditionalFunding}
+                                onClick={handleFunding}
                                 className="flex-1 py-3 bg-[#3BCFB4] text-white rounded-lg hover:opacity-90"
                             >
-                                추가 펀딩하기
+                                펀딩하기
                             </button>
                         </div>
                     </div>
 
-                    {/* 펀딩한 사람들 섹션 */}
                     <div className="bg-white rounded-lg p-6 border min-h-[600px]">
                         <h2 className="text-lg font-bold mb-4">
                             펀딩한 사람들 ({fundingData.participants.length}명)
                         </h2>
-                        <div className="space-y-4">
-                            {fundingData.participants.map((participant, index) => (
-                                <div key={index} className="flex justify-between items-center py-2">
-                                    <span className="text-gray-600">{participant.address}</span>
-                                    <span className="text-[#4B9AFB]">{participant.amount}</span>
-                                </div>
-                            ))}
-                        </div>
+                        {fundingData.participants.length === 0 ? (
+                            <p className="text-gray-500 text-center py-4">
+                                아직 펀딩한 사람이 없어요
+                            </p>
+                        ) : (
+                            <div className="space-y-4">
+                                {fundingData.participants.map((participant, index) => (
+                                    <div key={index} className="flex justify-between items-center py-2">
+                                        <span className="text-gray-600">{participant.address}</span>
+                                        <span className="text-[#4B9AFB]">{participant.amount}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {showShareModal && <ShareModal />}
+            {showFundingModal && (
+                <FundingModal
+                    fundingForm={fundingForm}
+                    setFundingForm={setFundingForm}
+                    setShowFundingModal={setShowFundingModal}
+                    handleFundingSubmit={handleFundingSubmit}
+                />
+            )}
         </div>
     );
 };
 
-export default FailedPage;
+export default MyOngoingPage;
